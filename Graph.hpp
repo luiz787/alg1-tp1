@@ -10,10 +10,9 @@ enum COLOR { BLACK, GREY, WHITE };
 class Graph {
 private:
     uint16_t amountOfVertices;
-    uint16_t** adjacencyMatrix; // TODO: refactor to adjacency list.
+    std::vector<std::list<uint16_t>> adjacencyLists;
     bool detectDirectedCycle();
     bool detectDirectedCycleHelper(uint16_t vertice, int* colors);
-    bool isNeighbor(uint16_t vertice) const;
 public:
     explicit Graph(uint16_t amountOfVertices);
     ~Graph();
@@ -22,7 +21,6 @@ public:
     uint16_t commander(uint16_t commanded, uint16_t* idades);
     void meeting();
     bool swap(uint16_t commander, uint16_t commanded);
-    void print(); // Temporary
 };
 
 

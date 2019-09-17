@@ -47,11 +47,9 @@ Graph readInputAndBuildGraph() {
                 }
                 break;
             case 'M':
-                std::cout << "M" << std::endl;
                 graph.meeting();
                 break;
         }
     }
-    graph.print();
     return graph;
 }
