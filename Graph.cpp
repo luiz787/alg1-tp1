@@ -4,61 +4,34 @@
 
 Graph::Graph(uint16_t amountOfVertices) {
     this->amountOfVertices = amountOfVertices;
-    this->adjacencyLists = new std::list<uint16_t>[amountOfVertices];
+    this->adjacencyLists = std::vector<std::list<uint16_t>>(amountOfVertices, std::list<uint16_t>());
 }
 
 Graph::~Graph() {
-    delete(adjacencyLists);
 }
 
 void Graph::addEdge(uint16_t from, uint16_t to) {
-    this->adjacencyLists[from - 1].push_back(to);
-}
-
-void Graph::print() {
-    /*std::cout << "Amount of vertices: " << amountOfVertices;
-    for (uint16_t i = 0; i < amountOfVertices; i++) {
-        auto currentList = adjacencyMatrix[i];
-        std::cout << "Vertice " << i + 1 << ": ";
-        for (uint16_t j = 0; j < amountOfVertices; j++) {
-            std::cout << adjacencyMatrix[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }*/
-}
-
-bool Graph::isNeighbor(uint16_t vertice) const {
-    return vertice == 1;
+    this->adjacencyLists[from - 1].push_back(to - 1);
 }
 
 bool Graph::swap(uint16_t commander, uint16_t commanded) {
-    auto adjacencyList = adjacencyLists[commander - 1];
-    auto iterator = adjacencyList.begin();
+    auto iterator = adjacencyLists[commander - 1].begin();
     bool edgeExists = false;
-    while (iterator != adjacencyList.end()) {
-        if (*iterator == commanded) {
-            adjacencyList.erase(iterator);
+    for (auto const& item : adjacencyLists[commander - 1]) {
+        if (item == commanded - 1) {
             edgeExists = true;
             break;
         }
     }
     if (edgeExists) {
+        adjacencyLists[commander - 1].remove(commanded - 1);
         adjacencyLists[commanded - 1].push_back(commander - 1);
     } else {
-        std::cout << "Relation from " << commander << " to " << commanded << "does not exist." << std::endl;
         return false;
     }
     bool resultedInCycle = detectDirectedCycle();
     if (resultedInCycle) {
-        std::cout << "This operation results in a cycle in the graph" << std::endl;
-        auto adjListCommanded = adjacencyLists[commanded - 1];
-        iterator = adjListCommanded.begin();
-        while (iterator != adjListCommanded.end()) {
-            if (*iterator == commander) {
-                adjListCommanded.erase(iterator);
-                break;
-            }
-        }
+        adjacencyLists[commanded - 1].remove(commander - 1);
         adjacencyLists[commander - 1].push_back(commanded - 1);
     }
     return !resultedInCycle;
@@ -82,18 +55,14 @@ bool Graph::detectDirectedCycle() {
 
 bool Graph::detectDirectedCycleHelper(uint16_t vertice, int *colors) {
     colors[vertice] = GREY;
-    //std::cout << "Current vertice: " << vertice << std::endl;
-    std::list<uint16_t> neighbors = adjacencyLists[vertice];
-    for (auto iterator = neighbors.begin(); iterator != neighbors.end(); ++iterator) {
-        auto neighbor = *iterator;
-        if (isNeighbor(neighbor)) {
-            if (colors[*iterator] == WHITE) {
-                if (detectDirectedCycleHelper(*iterator, colors)) {
-                    return true;
-                }
-            } else if (colors[*iterator] == GREY) {
+    for (auto& item : adjacencyLists[vertice]) {
+        auto neighbor = item;
+        if (colors[item] == WHITE) {
+            if (detectDirectedCycleHelper(item, colors)) {
                 return true;
             }
+        } else if (colors[item] == GREY) {
+            return true;
         }
     }
     colors[vertice] = BLACK;
@@ -107,20 +76,15 @@ uint16_t Graph::commander(uint16_t commanded, uint16_t* idades) {
     while (!filaComandados.empty()) {
         auto current = filaComandados.front();
         filaComandados.pop();
-
-        for (uint16_t i = 0; i < amountOfVertices; i++) {
-            for (auto& item : adjacencyLists[i]) {
-                if (item == current) { // Item commands current
-                    minimumCommanderAge = std::min(minimumCommanderAge, idades[item]);
-                    filaComandados.push(item);
+        for (uint16_t potentialParent = 0; potentialParent < amountOfVertices; potentialParent++) {
+            if (potentialParent != current) {
+                for (auto& item : adjacencyLists[potentialParent]) {
+                    if (item == current) {
+                        minimumCommanderAge = std::min(minimumCommanderAge, idades[potentialParent]);
+                        filaComandados.push(potentialParent);
+                    }
                 }
             }
-
-            // LOOK FOR DIRECT COMMANDERS
-            /*if (adjacencyMatrix[i][current] == 1) { // i COMMANDS commanded
-                minimumCommanderAge = std::min(minimumCommanderAge, idades[i]);
-                filaComandados.push(i);
-            }*/
         }
     }
     return minimumCommanderAge;
@@ -146,12 +110,12 @@ void Graph::meeting() {
         auto current = processingQueue.front();
         processingQueue.pop();
         result.push_back(current);
-            for (auto& item : adjacencyLists[current]) {
-                inEdges[item]--;
-                if (inEdges[item] == 0) {
-                    processingQueue.push(item);
-                }
+        for (auto& item : adjacencyLists[current]) {
+            inEdges[item]--;
+            if (inEdges[item] == 0) {
+                processingQueue.push(item);
             }
+        }
     }
 
    for (uint16_t i = 0; i < amountOfVertices; i++) {
