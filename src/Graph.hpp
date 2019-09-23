@@ -21,6 +21,8 @@ public:
     uint16_t commander(uint16_t commanded, uint16_t* idades);
     void meeting();
     bool swap(uint16_t commander, uint16_t commanded);
+
+    std::vector<uint16_t> computeInEdges() const;
 };
 
 

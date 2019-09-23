@@ -3,4 +3,4 @@ project(alg1tp1)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(alg1tp1 main.cpp Graph.cpp Graph.hpp)
+add_executable(alg1tp1 src/main.cpp src/Graph.cpp src/Graph.hpp)
