@@ -12,24 +12,25 @@ int main(int argc, char** argv) {
         return 1;
     }
     readInputAndBuildGraph(&inputFile);
+    inputFile.close();
     return 0;
 }
 
 void readInputAndBuildGraph(std::ifstream* inputFile) {
-    uint16_t quantidadePessoas, quantidadeRelacoes, quantidadeInstrucoes;
-    *inputFile >> quantidadePessoas >> quantidadeRelacoes >> quantidadeInstrucoes;
-    uint16_t idades[quantidadePessoas];
-    auto graph = Graph(quantidadePessoas);
-    for (uint8_t i = 0; i < quantidadePessoas; i++) {
-        *inputFile >> idades[i];
+    uint16_t amountOfPeople, amountOfRelations, amountOfInstructions;
+    *inputFile >> amountOfPeople >> amountOfRelations >> amountOfInstructions;
+    uint16_t ages[amountOfPeople];
+    auto graph = Graph(amountOfPeople);
+    for (uint8_t i = 0; i < amountOfPeople; i++) {
+        *inputFile >> ages[i];
     }
-    for (uint8_t i = 0; i < quantidadeRelacoes; i++) {
-        uint16_t comandante;
-        uint16_t comandado;
-        *inputFile >> comandante >> comandado;
-        graph.addEdge(comandante, comandado);
+    for (uint8_t i = 0; i < amountOfRelations; i++) {
+        uint16_t commander;
+        uint16_t commanded;
+        *inputFile >> commander >> commanded;
+        graph.addEdge(commander, commanded);
     }
-    for (uint8_t i = 0; i < quantidadeInstrucoes; i++) {
+    for (uint8_t i = 0; i < amountOfInstructions; i++) {
         char commandType;
         uint16_t minimumCommanderAge;
         *inputFile >> commandType;
@@ -46,7 +47,7 @@ void readInputAndBuildGraph(std::ifstream* inputFile) {
             case 'C':
                 uint16_t a;
                 *inputFile >> a;
-                minimumCommanderAge = graph.commander(a, idades);
+                minimumCommanderAge = graph.commander(a, ages);
                 if (minimumCommanderAge != 101) {
                     std::cout << "C " << minimumCommanderAge << std::endl;
                 } else {

@@ -2,13 +2,18 @@
 #include <queue>
 #include "Graph.hpp"
 
+/*
+ * Nota de implementação: alguns acessos às listas de adjacências possuem um "-1" ou "+1". Isso foi necessário para
+ * equalizar o formato da entrada (na qual os índices começam por 1) com o formato da linguagem de programação (na qual
+ * os índices começam por 0).
+ */
+
 Graph::Graph(uint16_t amountOfVertices) {
     this->amountOfVertices = amountOfVertices;
     this->adjacencyLists = std::vector<std::list<uint16_t>>(amountOfVertices, std::list<uint16_t>());
 }
 
-Graph::~Graph() {
-}
+Graph::~Graph() = default;
 
 void Graph::addEdge(uint16_t from, uint16_t to) {
     this->adjacencyLists[from - 1].push_back(to - 1);
@@ -68,13 +73,10 @@ bool Graph::detectDirectedCycleHelper(uint16_t vertice, int *colors) {
 }
 
 uint16_t Graph::commander(uint16_t commanded, uint16_t* idades) {
-    // traverse the adjacency list of given graph and
-    // for each edge (u, v) add an edge (v, u) in the
-    // transpose graph's adjacency list
     Graph transpose = Graph(amountOfVertices);
     for (uint16_t i = 0; i < amountOfVertices; i++) {
         for (auto &j : adjacencyLists[i]) {
-            transpose.addEdge(j + 1, i + 1);
+            transpose.addEdge(j + 1, i + 1); // Cria a aresta (j,i) dada uma aresta (i,j) no grafo original.
         }
     }
     uint16_t minimumCommanderAge = 101;
@@ -96,6 +98,9 @@ void Graph::meeting() {
     // FIND NODES THAT ARE NOT COMMANDED BY ANYONE
     std::vector<uint16_t> inEdges = computeInEdges();
     std::queue<uint16_t> processingQueue;
+    /* Busca nós que não são comandados por ninguém, ou seja, não tem nenhuma aresta "entrando", para iniciar o
+     * processamento da ordem topológica.
+     */
     for (uint16_t i = 0; i < amountOfVertices; i++) {
         if (inEdges[i] == 0) {
             processingQueue.push(i);
@@ -106,6 +111,10 @@ void Graph::meeting() {
         auto currentVertice = processingQueue.front();
         processingQueue.pop();
         result.push_back(currentVertice);
+        /*
+         * Nesse ponto, currentVertice foi "removido" do grafo, então precisamos de decrementar as inEdges de seus
+         * vizinhos.
+         */
         for (auto& vertice : adjacencyLists[currentVertice]) {
             inEdges[vertice]--;
             if (inEdges[vertice] == 0) {
